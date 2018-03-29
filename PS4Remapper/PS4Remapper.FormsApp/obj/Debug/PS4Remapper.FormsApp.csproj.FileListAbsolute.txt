@@ -1,0 +1,10 @@
+\\Mac\Home\Documents\Git\PS4Remapper\PS4Remapper\PS4Remapper.FormsApp\bin\Debug\PS4Remapper.FormsApp.exe.config
+\\Mac\Home\Documents\Git\PS4Remapper\PS4Remapper\PS4Remapper.FormsApp\bin\Debug\PS4Remapper.FormsApp.exe
+\\Mac\Home\Documents\Git\PS4Remapper\PS4Remapper\PS4Remapper.FormsApp\bin\Debug\PS4Remapper.FormsApp.pdb
+\\Mac\Home\Documents\Git\PS4Remapper\PS4Remapper\PS4Remapper.FormsApp\obj\Debug\PS4Remapper.FormsApp.csprojResolveAssemblyReference.cache
+\\Mac\Home\Documents\Git\PS4Remapper\PS4Remapper\PS4Remapper.FormsApp\obj\Debug\PS4Remapper.FormsApp.MainForm.resources
+\\Mac\Home\Documents\Git\PS4Remapper\PS4Remapper\PS4Remapper.FormsApp\obj\Debug\PS4Remapper.FormsApp.Properties.Resources.resources
+\\Mac\Home\Documents\Git\PS4Remapper\PS4Remapper\PS4Remapper.FormsApp\obj\Debug\PS4Remapper.FormsApp.csproj.GenerateResource.cache
+\\Mac\Home\Documents\Git\PS4Remapper\PS4Remapper\PS4Remapper.FormsApp\obj\Debug\PS4Remapper.FormsApp.csproj.CoreCompileInputs.cache
+\\Mac\Home\Documents\Git\PS4Remapper\PS4Remapper\PS4Remapper.FormsApp\obj\Debug\PS4Remapper.FormsApp.exe
+\\Mac\Home\Documents\Git\PS4Remapper\PS4Remapper\PS4Remapper.FormsApp\obj\Debug\PS4Remapper.FormsApp.pdb
