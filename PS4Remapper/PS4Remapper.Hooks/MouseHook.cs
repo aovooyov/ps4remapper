@@ -13,6 +13,10 @@ namespace PS4Remapper.Hooks
 
         public MouseHook()
         {
+        }
+
+        public void Hook()
+        {
             _windowsHookHandle = IntPtr.Zero;
             _user32LibraryHandle = IntPtr.Zero;
             _hookProc = LowLevelMouseProc; // we must keep alive _hookProc, because GC is not aware about SetWindowsHookEx behaviour.
@@ -23,7 +27,7 @@ namespace PS4Remapper.Hooks
                 int errorCode = Marshal.GetLastWin32Error();
                 throw new Win32Exception(errorCode, $"Failed to load library 'User32.dll'. Error {errorCode}: {new Win32Exception(Marshal.GetLastWin32Error()).Message}.");
             }
-            
+
             _windowsHookHandle = SetWindowsHookEx(WH_MOUSE_LL, _hookProc, _user32LibraryHandle, 0);
             if (_windowsHookHandle == IntPtr.Zero)
             {
@@ -32,23 +36,27 @@ namespace PS4Remapper.Hooks
             }
         }
 
+        public void UnHook()
+        {
+            if (_windowsHookHandle != IntPtr.Zero)
+            {
+                if (!UnhookWindowsHookEx(_windowsHookHandle))
+                {
+                    int errorCode = Marshal.GetLastWin32Error();
+                    throw new Win32Exception(errorCode, $"Failed to remove mouse hooks for '{Process.GetCurrentProcess().ProcessName}'. Error {errorCode}: {new Win32Exception(Marshal.GetLastWin32Error()).Message}.");
+                }
+                _windowsHookHandle = IntPtr.Zero;
+
+                // ReSharper disable once DelegateSubtraction
+                _hookProc -= LowLevelMouseProc;
+            }
+        }
+
         protected virtual void Dispose(bool disposing)
         {
             if (disposing)
             {
-                // because we can unhook only in the same thread, not in garbage collector thread
-                if (_windowsHookHandle != IntPtr.Zero)
-                {
-                    if (!UnhookWindowsHookEx(_windowsHookHandle))
-                    {
-                        int errorCode = Marshal.GetLastWin32Error();
-                        throw new Win32Exception(errorCode, $"Failed to remove mouse hooks for '{Process.GetCurrentProcess().ProcessName}'. Error {errorCode}: {new Win32Exception(Marshal.GetLastWin32Error()).Message}.");
-                    }
-                    _windowsHookHandle = IntPtr.Zero;
-
-                    // ReSharper disable once DelegateSubtraction
-                    _hookProc -= LowLevelMouseProc;
-                }
+                UnHook();
             }
 
             if (_user32LibraryHandle != IntPtr.Zero)

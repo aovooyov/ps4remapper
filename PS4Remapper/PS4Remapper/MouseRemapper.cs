@@ -1,23 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Windows.Forms;
 using PS4Remapper.Classes;
 using PS4Remapper.Hooks;
 using PS4Remapper.Hooks.EventArgs;
 using PS4Remapper.Hooks.States;
-using PS4Remapper.Interceptor;
 using PS4Remapper.Types;
+using PS4RemotePlayInterceptor;
 
 namespace PS4Remapper
 {
     public class MouseRemapper
     {
+        private readonly Remapper _remapper;
+
         private const int MOUSE_CENTER_X = 500;
         private const int MOUSE_CENTER_Y = 500;
         private const int MOUSE_RELEASE_TIME = 50;
         private const int MOUSE_SENSITIVITY_DIVISOR = 100000;
-
-        public DualShockState CurrentState { get; private set; }
 
         public delegate void OnMouseAxisChangedDelegate(byte x, byte y);
         public OnMouseAxisChangedDelegate OnMouseAxisChanged { get; set; }
@@ -43,10 +44,10 @@ namespace PS4Remapper
         public int LeftMouseMapping { get; set; }
         public int RightMouseMapping { get; set; }
 
-        public List<MapAction> Map { get; private set; }
-
-        public MouseRemapper()
+        public MouseRemapper(Remapper remapper)
         {
+            _remapper = remapper;
+
             IsCursorShowing = true;
 
             MouseSensitivity = 1;
@@ -54,6 +55,7 @@ namespace PS4Remapper
             MouseDecayThreshold = 0.1;
             MouseAnalogDeadzone = 14.25;
             MouseMakeupSpeed = 500;
+
             MouseMovementAnalog = Stick.Right;
             MouseInvertXAxis = false;
             MouseInvertYAxis = false;
@@ -61,232 +63,357 @@ namespace PS4Remapper
             RightMouseMapping = 10; // L2
         }
 
-        public void OnReceiveData(ref DualShockState state)
+        private byte RX;
+        private byte RY;
+
+        #region VERSION 1
+        public void OnReceiveData()
         {
-            if (CurrentState == null)
-            {
-                CurrentState = new DualShockState() { Battery = 255 };
-            }
+            if (!_remapper.CheckFocusedWindow())
+                return;
 
-            var checkState = new DualShockState();
-            // Left mouse
-            // Right mouse
-
-            // Mouse moved
-            if (CurrentMouseStroke != null && CurrentMouseStroke.DidMoved)
-            {
-                MouseSpeedX = (CurrentMouseStroke.VelocityX * MouseSensitivity) / MOUSE_SENSITIVITY_DIVISOR;
-                if (MouseInvertXAxis) MouseSpeedX *= -1;
-
-                MouseSpeedY = (CurrentMouseStroke.VelocityY * MouseSensitivity) / MOUSE_SENSITIVITY_DIVISOR;
-                if (MouseInvertYAxis) MouseSpeedY *= -1;
-
-                CurrentMouseStroke.DidMoved = false;
-
-                // Stop release timer
-                if (MouseReleaseTimer != null)
-                {
-                    MouseReleaseTimer.Stop();
-                    MouseReleaseTimer = null;
-                }
-            }
-            // Mouse idle
-            else
-            {
-                // Start decay
-                MouseSpeedX /= MouseDecayRate;
-                MouseSpeedY /= MouseDecayRate;
-
-                // Stop decaying joystick if below threshold
-                if (Math.Abs(MouseSpeedX) < MouseDecayThreshold || Math.Abs(MouseSpeedY) < MouseDecayThreshold)
-                {
-                    // Reset mouse speed
-                    if (Math.Abs(MouseSpeedX) < MouseDecayThreshold) MouseSpeedX = 0;
-                    if (Math.Abs(MouseSpeedY) < MouseDecayThreshold) MouseSpeedY = 0;
-
-                    // Start release timer
-                    if (MouseReleaseTimer == null)
-                    {
-                        MouseReleaseTimer = new System.Timers.Timer(MOUSE_RELEASE_TIME);
-                        MouseReleaseTimer.Start();
-                        MouseReleaseTimer.Elapsed += (s, e) =>
-                        {
-                            // Recenter cursor
-                            CursorHook.SetCursorPosition(MOUSE_CENTER_X, MOUSE_CENTER_Y);
-
-                            // Reset cursor overflow
-                            CursorOverflowX = 0;
-                            CursorOverflowY = 0;
-
-                            // Stop release timer
-                            MouseReleaseTimer.Stop();
-                            MouseReleaseTimer = null;
-                        };
-
-                    }
-                }
-            }
-
-            const double min = 0;
-            const double max = 255;
-
-            // Minimum speed
-            double positiveSpeed = 128 + MouseAnalogDeadzone;
-            double negativeSpeed = 128 - MouseAnalogDeadzone;
-
-            // Base speed
-            double baseX = ((MouseSpeedX > 0) ? positiveSpeed : ((MouseSpeedX < 0) ? negativeSpeed : 128));
-            double baseY = ((MouseSpeedY > 0) ? positiveSpeed : ((MouseSpeedY < 0) ? negativeSpeed : 128));
-
-            // Makeup speed
-            double makeupX = Math.Sign(MouseSpeedX) * MouseMakeupSpeed;
-            double makeupY = Math.Sign(MouseSpeedY) * MouseMakeupSpeed;
-
-            // Scale speed to analog values
-            double rx = baseX + (makeupX * MouseSpeedX * MouseSpeedX * 127);
-            double ry = baseY + (makeupY * MouseSpeedY * MouseSpeedY * 127);
-
-            byte scaledX = (byte)((rx < min) ? min : (rx > max) ? max : rx);
-            byte scaledY = (byte)((ry < min) ? min : (ry > max) ? max : ry);
-
-            // Set the analog values
-
-            CurrentState.RX = scaledX;
-            CurrentState.RY = scaledY;
-
-            // Invoke callback
-            OnMouseAxisChanged?.Invoke(scaledX, scaledY);
-
-            state = CurrentState;
+            _remapper.CurrentState.RX = RX;
+            _remapper.CurrentState.RY = RY;
         }
 
         public void OnMouseEvent(object sender, MouseHookEventArgs e)
         {
-            bool focusedWindow = true;
-
-//            // Focused
-//            if (focusedWindow)
-//            {
-//                if (EnableMouseInput)
-//                {
-//                    // Hide cursor
-//                    if (IsCursorShowing)
-//                    {
-//                        ShowCursorAndToolbar(false);
-//    }
-//}
-//            }
-//            // Not focused
-//            else
-//            {
-//                // Show cursor
-//                if (!IsCursorShowing)
-//                {
-//                    ShowCursorAndToolbar(true);
-//                }
-
-//                // Ignore the rest if not focused
-//                return;
-//            }
-
-//            // Ignore if disabled
-//            if (!EnableMouseInput)
-//                return;
-
-            // Left mouse
-            if (e.MouseState == MouseState.LeftButtonDown)
+            if (_remapper.IsInjected)
             {
-                LeftMouseDown = true;
-                e.Handled = focusedWindow;
+                ShowCursorAndToolbar(!_remapper.CheckFocusedWindow());
             }
-            else if (e.MouseState == MouseState.LeftButtonUp)
+
+            switch (e.MouseState)
             {
-                LeftMouseDown = false;
-                e.Handled = focusedWindow;
-            }
-            // Right mouse
-            else if (e.MouseState == MouseState.RightButtonDown)
-            {
-                RightMouseDown = true;
-                e.Handled = focusedWindow;
-            }
-            else if (e.MouseState == MouseState.RightButtonUp)
-            {
-                RightMouseDown = false;
-                e.Handled = focusedWindow;
-            }
-            // Mouse move
-            else if (e.MouseState == MouseState.Move)
-            {
-                var rawX = e.MouseData.Point.X;
-                var rawY = e.MouseData.Point.Y;
-
-                // Ignore if at center
-                if (rawX == MOUSE_CENTER_X && rawY == MOUSE_CENTER_Y)
-                    return;
-
-                #region Store mouse stroke
-
-                var newStroke = new MouseStroke()
-                {
-                    Timestamp = DateTime.Now,
-                    RawData = e,
-                    DidMoved = true,
-                    X = rawX + CursorOverflowX,
-                    Y = rawY + CursorOverflowY
-                };
-
-                if (CurrentMouseStroke != null)
-                {
-                    double deltaTime = (newStroke.Timestamp - CurrentMouseStroke.Timestamp).TotalSeconds;
-                    newStroke.VelocityX = (newStroke.X - CurrentMouseStroke.X) / deltaTime;
-                    newStroke.VelocityY = (newStroke.Y - CurrentMouseStroke.Y) / deltaTime;
-                }
-
-                CurrentMouseStroke = newStroke;
-
-                #endregion
-
-                #region Adjust cursor position
-
-                var tmpX = rawX;
-                var tmpY = rawY;
-                var didSetPosition = false;
-                var workingArea = Screen.PrimaryScreen.WorkingArea;
-
-                if (tmpX >= workingArea.Width)
-                {
-                    CursorOverflowX += workingArea.Width;
-                    tmpX = 0;
-                    didSetPosition = true;
-                }
-                else if (tmpX <= 0)
-                {
-                    CursorOverflowX -= workingArea.Width;
-                    tmpX = workingArea.Width;
-                    didSetPosition = true;
-                }
-
-                if (tmpY >= workingArea.Height)
-                {
-                    CursorOverflowY += workingArea.Height;
-                    tmpY = 0;
-                    didSetPosition = true;
-                }
-                else if (tmpY <= 0)
-                {
-                    CursorOverflowY -= workingArea.Height;
-                    tmpY = workingArea.Height;
-                    didSetPosition = true;
-                }
-
-                if (didSetPosition)
-                {
-                    //RemapperUtility.SetCursorPosition(tmpX, tmpY);
+                case MouseState.LeftButtonDown:
+                    LeftMouseDown = true;
                     e.Handled = true;
-                }
+                    break;
+                case MouseState.LeftButtonUp:
+                    LeftMouseDown = false;
+                    e.Handled = true;
+                    break;
+                case MouseState.RightButtonDown:
+                    RightMouseDown = true;
+                    e.Handled = true;
+                    break;
+                case MouseState.RightButtonUp:
+                    RightMouseDown = false;
+                    e.Handled = true;
+                    break;
+                case MouseState.Move:
 
-                #endregion
+                    if (MouseReleaseTimer != null)
+                    {
+                        MouseReleaseTimer.Stop();
+                        MouseReleaseTimer = null;
+                    }
+
+                    var x = e.MouseData.Point.X;
+                    var y = e.MouseData.Point.Y;
+                    var height = SystemInformation.VirtualScreen.Height;
+                    var width = SystemInformation.VirtualScreen.Width;
+
+                    if (x <= 0)
+                    {
+                        x = width / 2;
+                    }
+
+                    if (y <= 0)
+                    {
+                        y = height / 2;
+                    }
+
+                    if (x >= width)
+                    {
+                        x = width / 2;
+                    }
+
+                    if (y >= height)
+                    {
+                        y = height / 2;
+                    }
+
+                    var rx = (byte)Math.Ceiling(x / (double)width * 255);
+                    var ry = (byte)Math.Ceiling(y / (double)height * 255);
+
+                    RX = rx;
+                    RY = ry;
+
+                    //Debug.WriteLine($"{x} {y} {rx} {ry}");
+                    OnMouseAxisChanged?.Invoke(rx, ry);
+
+                    if (MouseReleaseTimer == null)
+                    {
+                        MouseReleaseTimer = new System.Timers.Timer(MOUSE_RELEASE_TIME);
+                        MouseReleaseTimer.Start();
+                        MouseReleaseTimer.Elapsed += (s, args) =>
+                        {
+                            MouseToCenter();
+                        };
+                    }
+                    e.Handled = true;
+
+                    break;
+                case MouseState.Wheel:
+                    break;
+                case MouseState.MiddleButtonDown:
+                    break;
+                case MouseState.MiddleButtonUp:
+                    break;
+                default:
+                    e.Handled = true;
+                    break;
+            }
+        }
+
+        private void MouseToCenter()
+        {
+            RX = 128;
+            RY = 128;
+
+            if (_remapper.IsInjected)
+            {
+                var cx = SystemInformation.VirtualScreen.Width / 2;
+                var cy = SystemInformation.VirtualScreen.Height / 2;
+
+                OnMouseAxisChanged?.Invoke(RX, RY);
+                CursorHook.SetCursorPosition(cx, cy);
+            }
+        }
+        #endregion
+
+
+        #region VERSION 2
+
+        //public void OnReceiveData()
+        //{
+        //    if (!_remapper.CheckFocusedWindow())
+        //        return;
+
+        //    // Mouse Input
+        //    // Mouse moved
+        //    if (CurrentMouseStroke != null && CurrentMouseStroke.DidMoved)
+        //    {
+        //        MouseSpeedX = (CurrentMouseStroke.VelocityX * MouseSensitivity) / MOUSE_SENSITIVITY_DIVISOR;
+        //        if (MouseInvertXAxis) MouseSpeedX *= -1;
+
+        //        MouseSpeedY = (CurrentMouseStroke.VelocityY * MouseSensitivity) / MOUSE_SENSITIVITY_DIVISOR;
+        //        if (MouseInvertYAxis) MouseSpeedY *= -1;
+
+        //        CurrentMouseStroke.DidMoved = false;
+
+        //        // Stop release timer
+        //        if (MouseReleaseTimer != null)
+        //        {
+        //            MouseReleaseTimer.Stop();
+        //            MouseReleaseTimer = null;
+        //        }
+        //    }
+        //    // Mouse idle
+        //    else
+        //    {
+        //        // Start decay
+        //        MouseSpeedX /= MouseDecayRate;
+        //        MouseSpeedY /= MouseDecayRate;
+
+        //        // Stop decaying joystick if below threshold
+        //        if (Math.Abs(MouseSpeedX) < MouseDecayThreshold || Math.Abs(MouseSpeedY) < MouseDecayThreshold)
+        //        {
+        //            // Reset mouse speed
+        //            if (Math.Abs(MouseSpeedX) < MouseDecayThreshold) MouseSpeedX = 0;
+        //            if (Math.Abs(MouseSpeedY) < MouseDecayThreshold) MouseSpeedY = 0;
+
+        //            // Start release timer
+        //            if (MouseReleaseTimer == null)
+        //            {
+        //                MouseReleaseTimer = new System.Timers.Timer(MOUSE_RELEASE_TIME);
+        //                MouseReleaseTimer.Start();
+        //                MouseReleaseTimer.Elapsed += (s, e) =>
+        //                {
+        //                    // Recenter cursor
+        //                    CursorHook.SetCursorPosition(MOUSE_CENTER_X, MOUSE_CENTER_Y);
+
+        //                    // Reset cursor overflow
+        //                    CursorOverflowX = 0;
+        //                    CursorOverflowY = 0;
+
+        //                    // Stop release timer
+        //                    MouseReleaseTimer.Stop();
+        //                    MouseReleaseTimer = null;
+        //                };
+
+        //            }
+        //        }
+        //    }
+
+        //    const double min = 0;
+        //    const double max = 255;
+        //    string analogProperty = MouseMovementAnalog == Stick.Left ? "L" : "R";
+
+        //    // Minimum speed
+        //    double positiveSpeed = 128 + MouseAnalogDeadzone;
+        //    double negativeSpeed = 128 - MouseAnalogDeadzone;
+
+        //    // Base speed
+        //    double baseX = ((MouseSpeedX > 0) ? positiveSpeed : ((MouseSpeedX < 0) ? negativeSpeed : 128));
+        //    double baseY = ((MouseSpeedY > 0) ? positiveSpeed : ((MouseSpeedY < 0) ? negativeSpeed : 128));
+
+        //    // Makeup speed
+        //    double makeupX = Math.Sign(MouseSpeedX) * MouseMakeupSpeed;
+        //    double makeupY = Math.Sign(MouseSpeedY) * MouseMakeupSpeed;
+
+        //    // Scale speed to analog values
+        //    double rx = baseX + (makeupX * MouseSpeedX * MouseSpeedX * 127);
+        //    double ry = baseY + (makeupY * MouseSpeedY * MouseSpeedY * 127);
+
+        //    byte scaledX = (byte)((rx < min) ? min : (rx > max) ? max : rx);
+        //    byte scaledY = (byte)((ry < min) ? min : (ry > max) ? max : ry);
+
+        //    _remapper.CurrentState.RX = scaledX;
+        //    _remapper.CurrentState.RY = scaledY;
+        //    // Invoke callback
+        //    OnMouseAxisChanged?.Invoke(scaledX, scaledY);
+        //}
+
+        //public void OnMouseEvent(object sender, MouseHookEventArgs e)
+        //{
+        //    bool focusedWindow = _remapper.CheckFocusedWindow();
+
+        //    // Focused
+        //    if (focusedWindow)
+        //    {
+        //        if (IsCursorShowing)
+        //        {
+        //            ShowCursorAndToolbar(false);
+        //        }
+
+        //    }
+        //    // Not focused
+        //    else
+        //    {
+        //        // Show cursor
+        //        if (!IsCursorShowing)
+        //        {
+        //            ShowCursorAndToolbar(true);
+        //        }
+
+        //        // Ignore the rest if not focused
+        //        return;
+        //    }
+
+        //    if (e.MouseState == MouseState.LeftButtonDown)
+        //    {
+        //        LeftMouseDown = true;
+        //        e.Handled = true;
+        //    }
+        //    else if (e.MouseState == MouseState.LeftButtonUp)
+        //    {
+        //        LeftMouseDown = false;
+        //        e.Handled = true;
+        //    }
+        //    // Right mouse
+        //    else if (e.MouseState == MouseState.RightButtonDown)
+        //    {
+        //        RightMouseDown = true;
+        //        e.Handled = true;
+        //    }
+        //    else if (e.MouseState == MouseState.RightButtonUp)
+        //    {
+        //        RightMouseDown = false;
+        //        e.Handled = true;
+        //    }
+        //    // Mouse move
+        //    else if (e.MouseState == MouseState.Move)
+        //    {
+        //        var rawX = e.MouseData.Point.X;
+        //        var rawY = e.MouseData.Point.Y;
+
+        //        // Ignore if at center
+        //        if (rawX == MOUSE_CENTER_X && rawY == MOUSE_CENTER_Y)
+        //            return;
+
+        //        #region Store mouse stroke
+        //        var newStroke = new MouseStroke()
+        //        {
+        //            Timestamp = DateTime.Now,
+        //            RawData = e,
+        //            DidMoved = true,
+        //            X = rawX + CursorOverflowX,
+        //            Y = rawY + CursorOverflowY
+        //        };
+
+        //        if (CurrentMouseStroke != null)
+        //        {
+        //            double deltaTime = (newStroke.Timestamp - CurrentMouseStroke.Timestamp).TotalSeconds;
+        //            newStroke.VelocityX = (newStroke.X - CurrentMouseStroke.X) / deltaTime;
+        //            newStroke.VelocityY = (newStroke.Y - CurrentMouseStroke.Y) / deltaTime;
+        //        }
+
+        //        CurrentMouseStroke = newStroke;
+        //        #endregion
+
+        //        #region Adjust cursor position
+        //        var tmpX = rawX;
+        //        var tmpY = rawY;
+        //        var didSetPosition = false;
+        //        var workingArea = Screen.PrimaryScreen.WorkingArea;
+
+        //        if (tmpX >= workingArea.Width)
+        //        {
+        //            CursorOverflowX += workingArea.Width;
+        //            tmpX = 0;
+        //            didSetPosition = true;
+        //        }
+        //        else if (tmpX <= 0)
+        //        {
+        //            CursorOverflowX -= workingArea.Width;
+        //            tmpX = workingArea.Width;
+        //            didSetPosition = true;
+        //        }
+
+        //        if (tmpY >= workingArea.Height)
+        //        {
+        //            CursorOverflowY += workingArea.Height;
+        //            tmpY = 0;
+        //            didSetPosition = true;
+        //        }
+        //        else if (tmpY <= 0)
+        //        {
+        //            CursorOverflowY -= workingArea.Height;
+        //            tmpY = workingArea.Height;
+        //            didSetPosition = true;
+        //        }
+
+        //        if (didSetPosition)
+        //        {
+        //            CursorHook.SetCursorPosition(tmpX, tmpY);
+        //            //e.Handled = true;
+        //        }
+        //        #endregion
+        //    }
+        //}
+
+        #endregion
+
+        public void ShowCursorAndToolbar(bool value)
+        {
+            if (_remapper.RemotePlayProcess == null)
+            {
+                return;
+            }
+
+            if (value)
+            {
+                CursorHook.ShowSystemCursor(true);
+                WindowHook.ShowStreamingToolBar(_remapper.RemotePlayProcess, true);
+                IsCursorShowing = true;
+            }
+            else
+            {
+                CursorHook.ShowSystemCursor(false);
+                WindowHook.ShowStreamingToolBar(_remapper.RemotePlayProcess, false);
+                IsCursorShowing = false;
             }
         }
     }

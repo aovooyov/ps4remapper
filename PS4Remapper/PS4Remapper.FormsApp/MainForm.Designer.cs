@@ -84,6 +84,9 @@
             this.Controls.Add(this.labelKey);
             this.Controls.Add(this.axisDisplay);
             this.Controls.Add(this.buttonInject);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
             this.Name = "MainForm";
             this.Text = "PS4 Remapper";
             this.ResumeLayout(false);

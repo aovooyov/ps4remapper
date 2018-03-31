@@ -1,0 +1,13 @@
+C:\Users\aovoo\Documents\Git\PS4Remapper\PS4Remapper\PS4Remapper.RemotePlay\bin\Debug\PS4Remapper.RemotePlay.dll
+C:\Users\aovoo\Documents\Git\PS4Remapper\PS4Remapper\PS4Remapper.RemotePlay\bin\Debug\PS4Remapper.RemotePlay.pdb
+C:\Users\aovoo\Documents\Git\PS4Remapper\PS4Remapper\PS4Remapper.RemotePlay\bin\Debug\EasyHook.dll
+C:\Users\aovoo\Documents\Git\PS4Remapper\PS4Remapper\PS4Remapper.RemotePlay\bin\Debug\EasyHook.xml
+C:\Users\aovoo\Documents\Git\PS4Remapper\PS4Remapper\PS4Remapper.RemotePlay\obj\Debug\PS4Remapper.RemotePlay.csproj.CoreCompileInputs.cache
+C:\Users\aovoo\Documents\Git\PS4Remapper\PS4Remapper\PS4Remapper.RemotePlay\obj\Debug\PS4Remapper.RemotePlay.dll
+C:\Users\aovoo\Documents\Git\PS4Remapper\PS4Remapper\PS4Remapper.RemotePlay\obj\Debug\PS4Remapper.RemotePlay.pdb
+C:\Users\aovoo\Documents\Git\PS4Remapper\PS4Remapper\PS4Remapper.RemotePlay\bin\Debug\EasyHook32.dll
+C:\Users\aovoo\Documents\Git\PS4Remapper\PS4Remapper\PS4Remapper.RemotePlay\bin\Debug\EasyHook32Svc.exe
+C:\Users\aovoo\Documents\Git\PS4Remapper\PS4Remapper\PS4Remapper.RemotePlay\bin\Debug\EasyHook64.dll
+C:\Users\aovoo\Documents\Git\PS4Remapper\PS4Remapper\PS4Remapper.RemotePlay\bin\Debug\EasyHook64Svc.exe
+C:\Users\aovoo\Documents\Git\PS4Remapper\PS4Remapper\PS4Remapper.RemotePlay\bin\Debug\EasyLoad32.dll
+C:\Users\aovoo\Documents\Git\PS4Remapper\PS4Remapper\PS4Remapper.RemotePlay\bin\Debug\EasyLoad64.dll

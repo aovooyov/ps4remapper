@@ -1,6 +1,5 @@
-\\Mac\Home\Documents\Git\PS4Remapper\PS4Remapper\PS4Remapper.Hooks\bin\Debug\PS4Remapper.Hooks.dll
-\\Mac\Home\Documents\Git\PS4Remapper\PS4Remapper\PS4Remapper.Hooks\bin\Debug\PS4Remapper.Hooks.pdb
-\\Mac\Home\Documents\Git\PS4Remapper\PS4Remapper\PS4Remapper.Hooks\obj\Debug\PS4Remapper.Hooks.csprojResolveAssemblyReference.cache
-\\Mac\Home\Documents\Git\PS4Remapper\PS4Remapper\PS4Remapper.Hooks\obj\Debug\PS4Remapper.Hooks.csproj.CoreCompileInputs.cache
-\\Mac\Home\Documents\Git\PS4Remapper\PS4Remapper\PS4Remapper.Hooks\obj\Debug\PS4Remapper.Hooks.dll
-\\Mac\Home\Documents\Git\PS4Remapper\PS4Remapper\PS4Remapper.Hooks\obj\Debug\PS4Remapper.Hooks.pdb
+C:\Users\aovoo\Documents\Git\PS4Remapper\PS4Remapper\PS4Remapper.Hooks\bin\Debug\PS4Remapper.Hooks.dll
+C:\Users\aovoo\Documents\Git\PS4Remapper\PS4Remapper\PS4Remapper.Hooks\bin\Debug\PS4Remapper.Hooks.pdb
+C:\Users\aovoo\Documents\Git\PS4Remapper\PS4Remapper\PS4Remapper.Hooks\obj\Debug\PS4Remapper.Hooks.csproj.CoreCompileInputs.cache
+C:\Users\aovoo\Documents\Git\PS4Remapper\PS4Remapper\PS4Remapper.Hooks\obj\Debug\PS4Remapper.Hooks.dll
+C:\Users\aovoo\Documents\Git\PS4Remapper\PS4Remapper\PS4Remapper.Hooks\obj\Debug\PS4Remapper.Hooks.pdb

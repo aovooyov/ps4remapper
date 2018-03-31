@@ -41,6 +41,7 @@
   <ItemGroup>
     <Compile Include="Classes\MapAction.cs" />
     <Compile Include="Classes\MouseStroke.cs" />
+    <Compile Include="KeyboardRemapper.cs" />
     <Compile Include="MouseRemapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Remapper.cs" />
@@ -51,9 +52,13 @@
       <Project>{b441401e-b3f7-49d0-a02d-b5aef6f14b52}</Project>
       <Name>PS4Remapper.Hooks</Name>
     </ProjectReference>
-    <ProjectReference Include="..\PS4Remapper.Interceptor\PS4Remapper.Interceptor.csproj">
+    <ProjectReference Include="..\PS4Remapper.RemotePlay\PS4Remapper.RemotePlay.csproj">
       <Project>{f709a2e9-280b-42d3-9e39-5829f404cfa0}</Project>
-      <Name>PS4Remapper.Interceptor</Name>
+      <Name>PS4Remapper.RemotePlay</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PS4RemotePlayInterceptor\PS4RemotePlayInterceptor.csproj">
+      <Project>{7ea5cd79-4454-4be5-bb06-fa4c8122808a}</Project>
+      <Name>PS4RemotePlayInterceptor</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
