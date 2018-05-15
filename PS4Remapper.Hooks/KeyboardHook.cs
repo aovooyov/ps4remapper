@@ -11,11 +11,6 @@ namespace PS4Remapper.Hooks
     {
         public event EventHandler<KeyboardHookEventArgs> KeyboardPressed;
 
-        public KeyboardHook()
-        {
-            
-        }
-
         public void Hook()
         {
             _windowsHookHandle = IntPtr.Zero;

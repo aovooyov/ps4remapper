@@ -9,6 +9,19 @@ namespace PS4Remapper.Classes
         public string Property { get; set; }
         public object Value { get; set; }
 
+        public object NegativeValue
+        {
+            get
+            {
+                switch (Value)
+                {
+                    case bool _:
+                        return false;
+                }
+                return Value;
+            }
+        }
+
         public MapAction()
         {
 

@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace PS4Remapper.FormsApp
@@ -13,7 +7,6 @@ namespace PS4Remapper.FormsApp
     public partial class MainForm : Form
     {
         private readonly Remapper _remapper;
-        private bool IsTest = false;
 
         public MainForm()
         {
@@ -38,6 +31,34 @@ namespace PS4Remapper.FormsApp
             buttonInject.Text = _remapper.IsInjected ? "Stop" : "Inject";
         }
 
+        private void buttonDebugKeyboard_Click(object sender, EventArgs e)
+        {
+            if (_remapper.IsInjected)
+            {
+                _remapper.Stop();
+            }
+            else
+            {
+                _remapper.DebugKeyboard();
+            }
+
+            buttonDebugKeyboard.Text = _remapper.IsInjected ? "Stop Debug Keyboard" : "Debug Keyboard";
+        }
+        
+        private void buttonDebugMouse_Click(object sender, EventArgs e)
+        {
+            if (_remapper.IsInjected)
+            {
+                _remapper.Stop();
+            }
+            else
+            {
+                _remapper.DebugMouse();
+            }
+
+            buttonDebugKeyboard.Text = _remapper.IsInjected ? "Stop Debug Mouse" : "Debug Mouse";
+        }
+
         private void OnMouseAxisChanged(byte x, byte y)
         {
             float fx = (2 * (x / 255f)) - 1;
@@ -59,15 +80,6 @@ namespace PS4Remapper.FormsApp
             {
                 labelKey.Text = $"Key: {name}";
             }));
-        }
-
-        private void buttonTest_Click(object sender, EventArgs e)
-        {
-            //IsTest = !IsTest;
-
-            //Cursor.Clip = IsTest ? new Rectangle(0, 0, 500, 500) : Screen.PrimaryScreen.Bounds;
-
-            //buttonTest.Text = IsTest ? "Stop" : "Test";
         }
     }
 }

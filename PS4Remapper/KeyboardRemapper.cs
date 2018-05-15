@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using PS4Remapper.Classes;
 using PS4Remapper.Hooks;
@@ -16,7 +18,7 @@ namespace PS4Remapper
         private readonly Remapper _remapper;
 
         private Dictionary<Keys, bool> _pressed;
-        private Dictionary<Keys, MapAction> _keys;
+        private Dictionary<Keys, MapAction> _actions;
 
         public List<MapAction> Map { get; private set; }
 
@@ -27,7 +29,7 @@ namespace PS4Remapper
         {
             _remapper = remapper;
             _pressed = new Dictionary<Keys, bool>();
-            _keys = new Dictionary<Keys, MapAction>();
+            _actions = new Dictionary<Keys, MapAction>();
 
             Map = new List<MapAction>
             {
@@ -68,7 +70,31 @@ namespace PS4Remapper
 
             CreateActions();
         }
+        
+        public void CreateActions()
+        {
+            var dict = new Dictionary<Keys, MapAction>();
 
+            foreach (MapAction item in Map)
+            {
+                if (item.Key == Keys.None)
+                {
+                    continue;
+                }
+
+                try
+                {
+                    dict.Add(item.Key, item);
+                }
+                catch (ArgumentException ex)
+                {
+                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+
+            _actions = dict;
+        }
+        
         public void OnKeyPressed(object sender, KeyboardHookEventArgs e)
         {
             // https://msdn.microsoft.com/en-us/library/windows/desktop/dd375731(v=vs.85).aspx
@@ -78,10 +104,7 @@ namespace PS4Remapper
                 return;
             }
 
-            int vk = e.KeyboardData.VirtualCode;
-            Keys key = (Keys)vk;
-
-            Debug.WriteLine(key);
+            var key = (Keys)e.KeyboardData.VirtualCode;
 
             // Key down
             if (e.KeyboardState == KeyboardState.KeyDown)
@@ -102,7 +125,7 @@ namespace PS4Remapper
                     _pressed.Remove(key);
                     ExecuteActionsByKey(_pressed.Keys.ToList());
                 }
-
+                
                 e.Handled = true;
             }
 
@@ -111,31 +134,14 @@ namespace PS4Remapper
             {
                 _remapper.CurrentState = null;
             }
-        }
 
-        public void CreateActions()
-        {
-            var dict = new Dictionary<Keys, MapAction>();
-
-            Action<MapAction> addItem = item =>
+            if (_remapper.IsDebugKeyboard)
             {
-                try
+                if (IsKeyDown())
                 {
-                    dict.Add(item.Key, item);
+                    Debug.WriteLine(string.Join(",", _pressed.Keys));
                 }
-                catch (ArgumentException ex)
-                {
-                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            };
-
-            foreach (MapAction item in Map)
-            {
-                if (item.Key == Keys.None) continue;
-                addItem(item);
             }
-
-            _keys = dict;
         }
 
         public bool IsKeyDown()
@@ -143,21 +149,21 @@ namespace PS4Remapper
             return _pressed.Count > 0;
         }
 
-        public bool IsKeyInUse(Keys key)
+        public void ExecuteActionsByKey(List<Keys> pressed)
         {
-            return _keys.ContainsKey(key);
-        }
+            var state = new DualShockState();
 
-        public void ExecuteActionsByKey(List<Keys> keys)
-        {
-            foreach (var key in keys)
+            foreach (var key in pressed)
             {
-                if (key == Keys.None) continue;
+                if (key == Keys.None)
+                {
+                    continue;
+                }
 
                 try
                 {
-                    var action = _keys[key];
-                    ExecuteRemapAction(action);
+                    var action = _actions[key];
+                    ExecuteRemapAction(action, state);
                 }
                 catch (Exception ex)
                 {
@@ -166,16 +172,14 @@ namespace PS4Remapper
             }
         }
 
-        private void ExecuteRemapAction(MapAction action)
+        #region  Version 1
+        private void ExecuteRemapAction(MapAction action, DualShockState state)
         {
-            if (_remapper.CurrentState == null)
-                _remapper.CurrentState = new DualShockState();
-
             // Try to set property using Reflection
             bool didSetProperty = false;
             try
             {
-                SetValue(_remapper.CurrentState, action.Property, action.Value);
+                SetValue(state, action.Property, action.Value);
                 didSetProperty = true;
                 OnKeyChanged?.Invoke(action.Name);
             }
@@ -183,8 +187,10 @@ namespace PS4Remapper
 
             if (didSetProperty)
             {
-                _remapper.CurrentState.Battery = 255;
-                _remapper.CurrentState.IsCharging = true;
+                state.Battery = 255;
+                state.IsCharging = true;
+
+                _remapper.CurrentState = state;
             }
         }
 
@@ -194,7 +200,7 @@ namespace PS4Remapper
             Type type = inputObject.GetType();
 
             //get the property information based on the type
-            System.Reflection.PropertyInfo propertyInfo = type.GetProperty(propertyName);
+            PropertyInfo propertyInfo = type.GetProperty(propertyName);
 
             //find the property type
             Type propertyType = propertyInfo.PropertyType;
@@ -209,11 +215,17 @@ namespace PS4Remapper
 
             //Set the value of the property
             propertyInfo.SetValue(inputObject, propertyVal, null);
+
+            Task.Factory.StartNew(() => Debug.WriteLine($""));
         }
 
         public static bool IsNullableType(Type type)
         {
             return type.IsGenericType && type.GetGenericTypeDefinition().Equals(typeof(Nullable<>));
         }
+
+
+        #endregion
+
     }
 }

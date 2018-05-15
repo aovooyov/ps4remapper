@@ -11,10 +11,6 @@ namespace PS4Remapper.Hooks
     {
         public event EventHandler<MouseHookEventArgs> MouseEvent;
 
-        public MouseHook()
-        {
-        }
-
         public void Hook()
         {
             _windowsHookHandle = IntPtr.Zero;

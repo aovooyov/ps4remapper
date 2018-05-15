@@ -9,6 +9,9 @@ namespace PS4Remapper
 {
     public class Remapper
     {
+        public bool IsDebugKeyboard { get; set; } = false;
+        public bool IsDebugMouse { get; set; } = false;
+
         public Process RemotePlayProcess { get; set; }
 
         private KeyboardHook _keyboard;
@@ -38,8 +41,6 @@ namespace PS4Remapper
 
             Interceptor.InjectionMode = InjectionMode.Compatibility;
             Interceptor.Callback = new InterceptionDelegate(OnReceiveData);
-
-            _mouse.Hook();
         }
 
         public void Inject()
@@ -49,6 +50,7 @@ namespace PS4Remapper
                 return;
             }
 
+            _mouse.Hook();
             _keyboard.Hook();
 
             PID = Interceptor.Inject();
@@ -57,8 +59,56 @@ namespace PS4Remapper
             IsInjected = true;
         }
 
+        public void DebugKeyboard()
+        {
+            if (IsInjected)
+            {
+                return;
+            }
+
+            _keyboard.Hook();
+
+            IsDebugKeyboard = true;
+            IsInjected = true;
+        }
+
+        public void DebugMouse()
+        {
+            if (IsInjected)
+            {
+                return;
+            }
+
+            _mouse.Hook();
+
+            IsDebugMouse = true;
+            IsInjected = true;
+        }
+
         public void Stop()
         {
+            if (IsDebugKeyboard)
+            {
+                IsDebugKeyboard = false;
+                IsInjected = false;
+
+                _keyboard.UnHook();
+                _keyboard.KeyboardPressed -= KeyboardOnKeyboardPressed;
+
+                return;
+            }
+
+            if (IsDebugMouse)
+            {
+                IsDebugMouse = false;
+                IsInjected = false;
+
+                _mouse.UnHook();
+                _mouse.MouseEvent -= MouseOnMouseEvent;
+
+                return;
+            }
+
             if (!IsInjected)
             {
                 return;
@@ -69,7 +119,7 @@ namespace PS4Remapper
             _mouseRemapper.ShowCursorAndToolbar(true);
 
             _keyboard.UnHook();
-            //_mouse.UnHook();
+            _mouse.UnHook();
 
             _keyboard.KeyboardPressed -= KeyboardOnKeyboardPressed;
             _mouse.MouseEvent -= MouseOnMouseEvent;
@@ -87,18 +137,15 @@ namespace PS4Remapper
 
             if (CurrentState == null)
             {
-                CurrentState = new DualShockState() { Battery = 255 };
+                CurrentState = new DualShockState { Battery = 255 };
             }
 
             _mouseRemapper.OnReceiveData();
             state = CurrentState;
-
-            //Debug.WriteLine($"{state.RX} {state.RY} {state.Cross}", "Callback");
         }
 
         private void KeyboardOnKeyboardPressed(object sender, KeyboardHookEventArgs e)
         {
-            //Debug.WriteLine($"{e.KeyboardData.VirtualCode}", "KEY");
             if (!IsInjected)
             {
                 return;
@@ -106,7 +153,7 @@ namespace PS4Remapper
 
             _keyboardRemapper.OnKeyPressed(sender, e);
         }
-
+        
         private void MouseOnMouseEvent(object sender, MouseHookEventArgs e)
         {
             _mouseRemapper.OnMouseEvent(sender, e);
@@ -126,12 +173,12 @@ namespace PS4Remapper
 
         public bool CheckFocusedWindow()
         {
-            if (RemotePlayProcess == null)
+            if (RemotePlayProcess != null && WindowHook.IsProcessInForeground(RemotePlayProcess))
             {
-                return false;
+                return true;
             }
 
-            return WindowHook.IsProcessInForeground(RemotePlayProcess);
+            return IsDebugKeyboard || IsDebugKeyboard;
         }
     }
 }
