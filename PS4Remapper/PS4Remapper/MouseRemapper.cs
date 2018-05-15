@@ -44,6 +44,12 @@ namespace PS4Remapper
         public int LeftMouseMapping { get; set; }
         public int RightMouseMapping { get; set; }
 
+        private byte RX;
+        private byte RY;
+        private double sensitivity = 0.9;
+        private int height;
+        private int width;
+
         public MouseRemapper(Remapper remapper)
         {
             _remapper = remapper;
@@ -61,10 +67,17 @@ namespace PS4Remapper
             MouseInvertYAxis = false;
             LeftMouseMapping = 11; // R2
             RightMouseMapping = 10; // L2
-        }
 
-        private byte RX;
-        private byte RY;
+            //var sense = (sensitivity == 1 ? 1 : Math.Abs(sensitivity - 1));
+            //height = (int)Math.Ceiling(Screen.PrimaryScreen.Bounds.Height * sense);
+            //width = (int)Math.Ceiling(Screen.PrimaryScreen.Bounds.Width * sense);
+
+            height = 200;
+            width = 200;
+
+            Debug.WriteLine($"{Screen.PrimaryScreen.Bounds.Width}x{Screen.PrimaryScreen.Bounds.Height}", "Screen");
+            Debug.WriteLine($"{width}x{height}", "Screen");
+        }
 
         #region VERSION 1
         public void OnReceiveData()
@@ -78,28 +91,29 @@ namespace PS4Remapper
 
         public void OnMouseEvent(object sender, MouseHookEventArgs e)
         {
+            var focus = _remapper.CheckFocusedWindow();
             if (_remapper.IsInjected)
             {
-                ShowCursorAndToolbar(!_remapper.CheckFocusedWindow());
+                ShowCursorAndToolbar(!focus);
             }
 
             switch (e.MouseState)
             {
                 case MouseState.LeftButtonDown:
                     LeftMouseDown = true;
-                    e.Handled = true;
+                    e.Handled = focus;
                     break;
                 case MouseState.LeftButtonUp:
                     LeftMouseDown = false;
-                    e.Handled = true;
+                    e.Handled = focus;
                     break;
                 case MouseState.RightButtonDown:
                     RightMouseDown = true;
-                    e.Handled = true;
+                    e.Handled = focus;
                     break;
                 case MouseState.RightButtonUp:
                     RightMouseDown = false;
-                    e.Handled = true;
+                    e.Handled = focus;
                     break;
                 case MouseState.Move:
 
@@ -111,28 +125,30 @@ namespace PS4Remapper
 
                     var x = e.MouseData.Point.X;
                     var y = e.MouseData.Point.Y;
-                    var height = SystemInformation.VirtualScreen.Height;
-                    var width = SystemInformation.VirtualScreen.Width;
 
                     if (x <= 0)
                     {
-                        x = width / 2;
+                        x = 0;
                     }
 
                     if (y <= 0)
                     {
-                        y = height / 2;
+                        y = 0;
                     }
 
                     if (x >= width)
                     {
-                        x = width / 2;
+                        MouseToCenter();
+                        break;
                     }
 
                     if (y >= height)
                     {
-                        y = height / 2;
+                        MouseToCenter();
+                        break;
                     }
+
+                    Debug.WriteLine($"{x}x{y}", "Coors");
 
                     var rx = (byte)Math.Ceiling(x / (double)width * 255);
                     var ry = (byte)Math.Ceiling(y / (double)height * 255);
@@ -152,8 +168,7 @@ namespace PS4Remapper
                             MouseToCenter();
                         };
                     }
-                    e.Handled = true;
-
+                    e.Handled = focus;
                     break;
                 case MouseState.Wheel:
                     break;
@@ -162,7 +177,7 @@ namespace PS4Remapper
                 case MouseState.MiddleButtonUp:
                     break;
                 default:
-                    e.Handled = true;
+                    e.Handled = focus;
                     break;
             }
         }
@@ -172,14 +187,11 @@ namespace PS4Remapper
             RX = 128;
             RY = 128;
 
-            if (_remapper.IsInjected)
-            {
-                var cx = SystemInformation.VirtualScreen.Width / 2;
-                var cy = SystemInformation.VirtualScreen.Height / 2;
+            var cx = width / 2;
+            var cy = height / 2;
 
-                OnMouseAxisChanged?.Invoke(RX, RY);
-                CursorHook.SetCursorPosition(cx, cy);
-            }
+            OnMouseAxisChanged?.Invoke(RX, RY);
+            CursorHook.SetCursorPosition(cx, cy);
         }
         #endregion
 

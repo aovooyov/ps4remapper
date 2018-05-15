@@ -52,10 +52,6 @@
       <Project>{b441401e-b3f7-49d0-a02d-b5aef6f14b52}</Project>
       <Name>PS4Remapper.Hooks</Name>
     </ProjectReference>
-    <ProjectReference Include="..\PS4Remapper.RemotePlay\PS4Remapper.RemotePlay.csproj">
-      <Project>{f709a2e9-280b-42d3-9e39-5829f404cfa0}</Project>
-      <Name>PS4Remapper.RemotePlay</Name>
-    </ProjectReference>
     <ProjectReference Include="..\PS4RemotePlayInterceptor\PS4RemotePlayInterceptor.csproj">
       <Project>{7ea5cd79-4454-4be5-bb06-fa4c8122808a}</Project>
       <Name>PS4RemotePlayInterceptor</Name>

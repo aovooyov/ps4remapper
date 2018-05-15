@@ -13,6 +13,7 @@ namespace PS4Remapper.FormsApp
     public partial class MainForm : Form
     {
         private readonly Remapper _remapper;
+        private bool IsTest = false;
 
         public MainForm()
         {
@@ -21,8 +22,6 @@ namespace PS4Remapper.FormsApp
             _remapper = new Remapper();
             _remapper.Mouse.OnMouseAxisChanged += OnMouseAxisChanged;
             _remapper.Keyboard.OnKeyChanged += OnKeyChanged;
-
-            
         }
         
         private void buttonInject_Click(object sender, EventArgs e)
@@ -60,6 +59,15 @@ namespace PS4Remapper.FormsApp
             {
                 labelKey.Text = $"Key: {name}";
             }));
+        }
+
+        private void buttonTest_Click(object sender, EventArgs e)
+        {
+            //IsTest = !IsTest;
+
+            //Cursor.Clip = IsTest ? new Rectangle(0, 0, 500, 500) : Screen.PrimaryScreen.Bounds;
+
+            //buttonTest.Text = IsTest ? "Stop" : "Test";
         }
     }
 }
