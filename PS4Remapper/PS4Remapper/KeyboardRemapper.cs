@@ -81,6 +81,8 @@ namespace PS4Remapper
             int vk = e.KeyboardData.VirtualCode;
             Keys key = (Keys)vk;
 
+            Debug.WriteLine(key);
+
             // Key down
             if (e.KeyboardState == KeyboardState.KeyDown)
             {
