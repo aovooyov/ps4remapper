@@ -23,6 +23,7 @@ namespace PS4Remapper.FormsApp
             // Set the unhandled exception mode to force all Windows Forms errors
             // to go through the handler.
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+            Application.ApplicationExit += ApplicationOnApplicationExit;
 
             // Add the event handler for handling non-UI thread exceptions to the event. 
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(OnUnhandledException);
@@ -30,12 +31,17 @@ namespace PS4Remapper.FormsApp
             Application.Run(new MainForm());
         }
 
-        static void OnThreadException(object sender, ThreadExceptionEventArgs e)
+        private static void ApplicationOnApplicationExit(object sender, EventArgs eventArgs)
+        {
+            Remapper.Instance.Stop();   
+        }
+
+        private static void OnThreadException(object sender, ThreadExceptionEventArgs e)
         {
             MessageBox.Show(e.Exception.ToString(), "Unhandled Thread Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
-        static void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
+        private static void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             MessageBox.Show(e.ExceptionObject.ToString(), "Unhandled Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }

@@ -1,17 +1,18 @@
 ﻿using System;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
 
 namespace PS4Remapper.FormsApp
 {
-    public partial class MainForm : Form
+    public partial class MouseForm : Form
     {
-        public MainForm()
+        public MouseForm()
         {
             InitializeComponent();
 
             Remapper.Instance.Mouse.OnMouseAxisChanged += OnMouseAxisChanged;
-            Remapper.Instance.Keyboard.OnKeyChanged += OnKeyChanged;
 
             sensitivity.Value = Convert.ToDecimal(Remapper.Instance.Mouse.MouseSensitivity);
             decayRate.Value = Convert.ToDecimal(Remapper.Instance.Mouse.MouseDecayRate);
@@ -43,51 +44,18 @@ namespace PS4Remapper.FormsApp
             {
                 Remapper.Instance.Mouse.MouseMakeupSpeed = Convert.ToDouble(makeupSpeed.Value);
             };
-        }
-        
-        private void buttonInject_Click(object sender, EventArgs e)
-        {
-            if (Remapper.Instance.IsInjected)
-            {
-                Remapper.Instance.Stop();
-            }
-            else
-            {
-                Remapper.Instance.Inject();
-            }
 
-            buttonInject.Text = Remapper.Instance.IsInjected ? "Stop" : "Inject";
+            Remapper.Instance.Mouse.ShowCursorAndToolbar(true);
+            Remapper.Instance.DebugMouse(Process.GetCurrentProcess());
+
+            Debug.WriteLine($"Process ID {Remapper.Instance.RemotePlayProcess.Id}");
+            Debug.WriteLine($"Process Name {Remapper.Instance.RemotePlayProcess.ProcessName}");
         }
 
-        private void buttonDebugKeyboard_Click(object sender, EventArgs e)
+        protected override void OnClosing(CancelEventArgs e)
         {
-            if (Remapper.Instance.IsInjected)
-            {
-                Remapper.Instance.Stop();
-            }
-            else
-            {
-                Remapper.Instance.DebugKeyboard();
-            }
-
-            buttonDebugKeyboard.Text = Remapper.Instance.IsInjected ? "Stop Debug Keyboard" : "Debug Keyboard";
-        }
-        
-        private void buttonDebugMouse_Click(object sender, EventArgs e)
-        {
-            //if (Remapper.Instance.IsInjected)
-            //{
-            //    Remapper.Instance.Stop();
-            //}
-            //else
-            //{
-            //    Remapper.Instance.DebugMouse();
-            //}
-
-            //buttonDebugMouse.Text = Remapper.Instance.IsInjected ? "Stop Debug Mouse" : "Debug Mouse";
-
-            var form = new MouseForm();
-            form.Show();
+            Remapper.Instance.Stop();
+            base.OnClosing(e);
         }
 
         private void OnMouseAxisChanged(byte x, byte y)
@@ -98,19 +66,11 @@ namespace PS4Remapper.FormsApp
 
             BeginInvoke(new Action(() =>
             {
-                labelMouse.Text = $"Mouse: {x} {y}";
-
                 axisDisplay.Value = point;
                 axisDisplay.Invalidate();
             }));
         }
 
-        private void OnKeyChanged(string name)
-        {
-            BeginInvoke(new Action(() =>
-            {
-                labelKey.Text = $"Key: {name}";
-            }));
-        }
+
     }
 }

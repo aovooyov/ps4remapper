@@ -1,0 +1,22 @@
+﻿<Page
+    x:Class="PS4Remapper.UI.DualShock4Page"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:PS4Remapper.UI"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Canvas>
+
+        <Image HorizontalAlignment="Stretch" Height="349" VerticalAlignment="Stretch" Width="545" Source="Assets/dualshock4.png" Margin="0,0,0,0" Canvas.Left="420" Canvas.Top="261"/>
+        <Polyline Stroke="Red"
+                  StrokeThickness="4"
+                  Points="10,200,60,140,130,140" Canvas.Left="855" Canvas.Top="105" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+        <Polyline Stroke="Red"
+                  StrokeThickness="4"
+                  Points="10,200,60,140,130,140" Canvas.Left="907" Canvas.Top="151" />
+
+    </Canvas>
+</Page>
