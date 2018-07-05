@@ -27,10 +27,10 @@ namespace PS4Remapper
         private KeyboardHook _keyboard;
         private MouseHook _mouse;
 
-        private MouseRemapper _mouseRemapper;
+        private MouseRemapper2 _mouseRemapper;
         private KeyboardRemapper _keyboardRemapper;
 
-        public MouseRemapper Mouse => _mouseRemapper;
+        public MouseRemapper2 Mouse => _mouseRemapper;
         public KeyboardRemapper Keyboard => _keyboardRemapper;
 
         public DualShockState CurrentState { get; set; }
@@ -54,9 +54,9 @@ namespace PS4Remapper
                 new MapAction("R Up", Keys.I, "RY", 0),
                 new MapAction("R Down", Keys.K, "RY", 255),
 
-                new MapAction("R1", Keys.E, "R1", true),
+                new MapAction("R1", Keys.U, "R1", true),
                 new MapAction("L1", Keys.Q, "L1", true),
-                new MapAction("L2", Keys.U, "L2", 255),
+                new MapAction("L2", Keys.E, "L2", 255),
                 new MapAction("R2", Keys.O, "R2", 255),
 
                 new MapAction("Triangle", Keys.C, "Triangle", true),
@@ -82,7 +82,7 @@ namespace PS4Remapper
             _keyboard = new KeyboardHook();
             _mouse = new MouseHook();
             
-            _mouseRemapper = new MouseRemapper(this);
+            _mouseRemapper = new MouseRemapper2(this);
             _keyboardRemapper = new KeyboardRemapper(this);
 
             Interceptor.InjectionMode = InjectionMode.Compatibility;
@@ -132,26 +132,8 @@ namespace PS4Remapper
             _mouse.Hook();
             _mouse.MouseEvent += MouseOnMouseEvent;
 
-            PID = process.Id;
-            RemotePlayProcess = process;
-
-            //Cursor.Clip = IsDebugMouse
-            //    ? Screen.PrimaryScreen.Bounds
-            //    : Screen.FromHandle(_remapper.RemotePlayProcess.MainWindowHandle).Bounds;
-            
             IsDebugMouse = true;
             IsInjected = true;
-
-            Task.Factory.StartNew(() =>
-            {
-                while (IsDebugMouse)
-                {
-                    Task.Delay(200);
-
-                    var state = new DualShockState();
-                    OnReceiveData(ref state);
-                }
-            });
         }
 
         public void Stop()
@@ -164,8 +146,6 @@ namespace PS4Remapper
             IsInjected = false;
             IsDebugMouse = false;
             IsDebugKeyboard = false;
-
-            _mouseRemapper.ShowCursorAndToolbar(true);
 
             _keyboard.UnHook();
             _mouse.UnHook();
@@ -191,6 +171,7 @@ namespace PS4Remapper
             }
 
             _mouseRemapper.OnReceiveData(ref state);
+            Debug.Print(state.ToString());
         }
 
         private void KeyboardOnKeyboardPressed(object sender, KeyboardHookEventArgs e)

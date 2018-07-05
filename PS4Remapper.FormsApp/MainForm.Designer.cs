@@ -249,7 +249,7 @@
             this.axisDisplay.Margin = new System.Windows.Forms.Padding(2);
             this.axisDisplay.Name = "axisDisplay";
             this.axisDisplay.OuterColor = System.Drawing.Color.DodgerBlue;
-            this.axisDisplay.Size = new System.Drawing.Size(100, 96);
+            this.axisDisplay.Size = new System.Drawing.Size(100, 100);
             this.axisDisplay.TabIndex = 1;
             this.axisDisplay.Value = ((System.Drawing.PointF)(resources.GetObject("axisDisplay.Value")));
             // 

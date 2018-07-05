@@ -18,7 +18,7 @@ namespace PS4Remapper
 
         private const int MOUSE_SENSITIVITY_DIVISOR = 100000;
 
-        public delegate void OnMouseAxisChangedDelegate(byte x, byte y);
+        public delegate void OnMouseAxisChangedDelegate(short x, short y);
         public OnMouseAxisChangedDelegate OnMouseAxisChanged { get; set; }
 
         public MouseStroke CurrentMouseStroke { get; private set; }
@@ -295,7 +295,7 @@ namespace PS4Remapper
                 MouseSpeedX /= MouseDecayRate;
                 MouseSpeedY /= MouseDecayRate;
 
-                // Stop decaying joystick if below threshold
+                #region Stop decaying joystick if below threshold
                 //if (Math.Abs(MouseSpeedX) < MouseDecayThreshold || Math.Abs(MouseSpeedY) < MouseDecayThreshold)
                 //{
                 //    // Reset mouse speed
@@ -323,6 +323,7 @@ namespace PS4Remapper
 
                 //    //}
                 //}
+                #endregion
             }
 
             const double min = 0;
