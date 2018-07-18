@@ -186,7 +186,7 @@
             // labelMouse
             // 
             this.labelMouse.AutoSize = true;
-            this.labelMouse.Location = new System.Drawing.Point(12, 137);
+            this.labelMouse.Location = new System.Drawing.Point(12, 265);
             this.labelMouse.Name = "labelMouse";
             this.labelMouse.Size = new System.Drawing.Size(71, 17);
             this.labelMouse.TabIndex = 16;
@@ -194,12 +194,14 @@
             // 
             // axisDisplay
             // 
+            this.axisDisplay.DeadZoneColor = System.Drawing.Color.Red;
+            this.axisDisplay.DeadZoneSize = 20;
             this.axisDisplay.InnerColor = System.Drawing.Color.GhostWhite;
             this.axisDisplay.InnerSize = 12;
-            this.axisDisplay.Location = new System.Drawing.Point(75, 12);
+            this.axisDisplay.Location = new System.Drawing.Point(12, 12);
             this.axisDisplay.Name = "axisDisplay";
             this.axisDisplay.OuterColor = System.Drawing.Color.DodgerBlue;
-            this.axisDisplay.Size = new System.Drawing.Size(100, 100);
+            this.axisDisplay.Size = new System.Drawing.Size(250, 250);
             this.axisDisplay.TabIndex = 0;
             this.axisDisplay.Value = ((System.Drawing.PointF)(resources.GetObject("axisDisplay.Value")));
             this.axisDisplay.DoubleClick += new System.EventHandler(this.axisDisplay_DoubleClick);
@@ -208,7 +210,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(254, 184);
+            this.ClientSize = new System.Drawing.Size(277, 342);
             this.Controls.Add(this.labelMouse);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.makeupSpeed);

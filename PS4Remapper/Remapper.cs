@@ -56,7 +56,7 @@ namespace PS4Remapper
 
                 new MapAction("R1", Keys.U, "R1", true),
                 new MapAction("L1", Keys.Q, "L1", true),
-                new MapAction("L2", Keys.E, "L2", 255),
+                new MapAction("L2", Keys.LShiftKey, "L2", 255),
                 new MapAction("R2", Keys.O, "R2", 255),
 
                 new MapAction("Triangle", Keys.C, "Triangle", true),
@@ -74,18 +74,16 @@ namespace PS4Remapper
 
                 new MapAction("Share", Keys.LControlKey, "Share", true),
                 new MapAction("Options", Keys.Z, "Options", true),
-                new MapAction("PS", Keys.LShiftKey, "PS", true),
+                //new MapAction("PS", Keys.LShiftKey, "PS", true),
 
                 new MapAction("Touch Button", Keys.T, "TouchButton", true)
             };
-            
-            _keyboard = new KeyboardHook();
-            _mouse = new MouseHook();
-            
+                        
             _mouseRemapper = new MouseRemapper2(this);
             _keyboardRemapper = new KeyboardRemapper(this);
 
-            Interceptor.InjectionMode = InjectionMode.Compatibility;
+            Interceptor.InjectionMode = InjectionMode.Auto;
+            Interceptor.EmulateController = true;
             Interceptor.Callback = new InterceptionDelegate(OnReceiveData);
         }
 
@@ -95,6 +93,9 @@ namespace PS4Remapper
             {
                 return;
             }
+
+            _keyboard = new KeyboardHook();
+            _mouse = new MouseHook();
 
             _mouse.Hook();
             _keyboard.Hook();
@@ -115,6 +116,7 @@ namespace PS4Remapper
                 return;
             }
 
+            _keyboard = new KeyboardHook();
             _keyboard.Hook();
             _keyboard.KeyboardPressed += KeyboardOnKeyboardPressed;
 
@@ -129,8 +131,11 @@ namespace PS4Remapper
                 return;
             }
 
+            _mouse = new MouseHook();
             _mouse.Hook();
             _mouse.MouseEvent += MouseOnMouseEvent;
+
+            Mouse.Start();
 
             IsDebugMouse = true;
             IsInjected = true;
@@ -147,13 +152,23 @@ namespace PS4Remapper
             IsDebugMouse = false;
             IsDebugKeyboard = false;
 
-            _keyboard.UnHook();
-            _mouse.UnHook();
+            if(_keyboard != null)
+            {
+                _keyboard?.UnHook();
+                _keyboard.KeyboardPressed -= KeyboardOnKeyboardPressed;
+                _keyboard = null;
+            }
 
-            _keyboard.KeyboardPressed -= KeyboardOnKeyboardPressed;
-            _mouse.MouseEvent -= MouseOnMouseEvent;
+            if(_mouse != null)
+            {
+                _mouse?.UnHook();
+                _mouse.MouseEvent -= MouseOnMouseEvent;
+                _mouse = null;
+            }
 
-            Interceptor.StopInjection();
+            Mouse.Stop();
+
+            //Interceptor.StopInjection();
             PID = -1;
             RemotePlayProcess = null;
         }
@@ -171,7 +186,7 @@ namespace PS4Remapper
             }
 
             _mouseRemapper.OnReceiveData(ref state);
-            Debug.Print(state.ToString());
+            //Debug.Print($"{state.RX} {state.RY} {state.LX} {state.LY}");
         }
 
         private void KeyboardOnKeyboardPressed(object sender, KeyboardHookEventArgs e)
@@ -213,24 +228,12 @@ namespace PS4Remapper
 
         public void SetValue(object inputObject, string propertyName, object propertyVal)
         {
-            //find out the type
             Type type = inputObject.GetType();
-
-            //get the property information based on the type
             PropertyInfo propertyInfo = type.GetProperty(propertyName);
-
-            //find the property type
             Type propertyType = propertyInfo.PropertyType;
-
-            //Convert.ChangeType does not handle conversion to nullable types
-            //if the property type is nullable, we need to get the underlying type of the property
             var targetType = IsNullableType(propertyInfo.PropertyType) ? Nullable.GetUnderlyingType(propertyInfo.PropertyType) : propertyInfo.PropertyType;
 
-            //Returns an System.Object with the specified System.Type and whose value is
-            //equivalent to the specified object.
             propertyVal = Convert.ChangeType(propertyVal, targetType);
-
-            //Set the value of the property
             propertyInfo.SetValue(inputObject, propertyVal, null);
         }
 

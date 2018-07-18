@@ -30,7 +30,6 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.buttonInject = new System.Windows.Forms.Button();
-            this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.labelKey = new System.Windows.Forms.Label();
             this.labelMouse = new System.Windows.Forms.Label();
             this.buttonDebugKeyboard = new System.Windows.Forms.Button();
@@ -58,7 +57,7 @@
             this.buttonInject.Location = new System.Drawing.Point(11, 8);
             this.buttonInject.Margin = new System.Windows.Forms.Padding(2);
             this.buttonInject.Name = "buttonInject";
-            this.buttonInject.Size = new System.Drawing.Size(167, 38);
+            this.buttonInject.Size = new System.Drawing.Size(129, 38);
             this.buttonInject.TabIndex = 0;
             this.buttonInject.Text = "Inject";
             this.buttonInject.UseVisualStyleBackColor = true;
@@ -67,7 +66,7 @@
             // labelKey
             // 
             this.labelKey.AutoSize = true;
-            this.labelKey.Location = new System.Drawing.Point(205, 136);
+            this.labelKey.Location = new System.Drawing.Point(187, 147);
             this.labelKey.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.labelKey.Name = "labelKey";
             this.labelKey.Size = new System.Drawing.Size(40, 17);
@@ -77,7 +76,7 @@
             // labelMouse
             // 
             this.labelMouse.AutoSize = true;
-            this.labelMouse.Location = new System.Drawing.Point(205, 113);
+            this.labelMouse.Location = new System.Drawing.Point(187, 113);
             this.labelMouse.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.labelMouse.Name = "labelMouse";
             this.labelMouse.Size = new System.Drawing.Size(58, 17);
@@ -89,7 +88,7 @@
             this.buttonDebugKeyboard.Location = new System.Drawing.Point(11, 50);
             this.buttonDebugKeyboard.Margin = new System.Windows.Forms.Padding(2);
             this.buttonDebugKeyboard.Name = "buttonDebugKeyboard";
-            this.buttonDebugKeyboard.Size = new System.Drawing.Size(167, 38);
+            this.buttonDebugKeyboard.Size = new System.Drawing.Size(129, 38);
             this.buttonDebugKeyboard.TabIndex = 0;
             this.buttonDebugKeyboard.Text = "Debug Keyboard";
             this.buttonDebugKeyboard.UseVisualStyleBackColor = true;
@@ -100,7 +99,7 @@
             this.buttonDebugMouse.Location = new System.Drawing.Point(11, 92);
             this.buttonDebugMouse.Margin = new System.Windows.Forms.Padding(2);
             this.buttonDebugMouse.Name = "buttonDebugMouse";
-            this.buttonDebugMouse.Size = new System.Drawing.Size(167, 38);
+            this.buttonDebugMouse.Size = new System.Drawing.Size(129, 38);
             this.buttonDebugMouse.TabIndex = 0;
             this.buttonDebugMouse.Text = "Debug Mouse";
             this.buttonDebugMouse.UseVisualStyleBackColor = true;
@@ -257,7 +256,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(556, 173);
+            this.ClientSize = new System.Drawing.Size(337, 173);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.makeupSpeed);
             this.Controls.Add(this.label4);
@@ -293,7 +292,6 @@
         #endregion
 
         private System.Windows.Forms.Button buttonInject;
-        private System.ComponentModel.BackgroundWorker backgroundWorker1;
         private Controls.AxisDisplay axisDisplay;
         private System.Windows.Forms.Label labelKey;
         private System.Windows.Forms.Label labelMouse;

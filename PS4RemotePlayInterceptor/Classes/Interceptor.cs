@@ -68,7 +68,7 @@ namespace PS4RemotePlayInterceptor
         // Injection
         public static InjectionMode InjectionMode = InjectionMode.Auto;
         // Emulation
-        public static bool EmulateController = false;
+        public static bool EmulateController = true;
 
         // Delegate
         public static InterceptionDelegate Callback { get; set; }
@@ -78,7 +78,23 @@ namespace PS4RemotePlayInterceptor
             // Find the process
             var process = FindRemotePlayProcess();
             if (process == null)
-                throw new InterceptorException(string.Format("{0} not found in list of processes", TARGET_PROCESS_NAME));
+            {
+                //var ps4RemotePlay = "C:\\Program Files (x86)\\Sony\\PS4 Remote Play\\RemotePlay.exe"; // "%ProgramFiles(x86)%\\Sony\\PS4 Remote Play\\RemotePlay.exe";
+                //process = Process.Start(ps4RemotePlay);
+                
+                if (process == null)
+                {
+                    throw new InterceptorException(string.Format("{0} not found in list of processes", TARGET_PROCESS_NAME));
+                }
+
+                //while (string.IsNullOrEmpty(process.MainWindowTitle))
+                //{
+                //    System.Threading.Thread.Sleep(100);
+                //    process.Refresh();
+                //}
+
+                //process = FindRemotePlayProcess();
+            }
 
             // Full path to our dll file
             string injectionLibrary = Path.Combine(Path.GetDirectoryName(typeof(InjectionInterface).Assembly.Location), INJECT_DLL_NAME);

@@ -38,11 +38,13 @@ namespace PS4Remapper.FormsApp
 
         private static void OnThreadException(object sender, ThreadExceptionEventArgs e)
         {
+            Remapper.Instance.Stop();
             MessageBox.Show(e.Exception.ToString(), "Unhandled Thread Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
         private static void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
+            Remapper.Instance.Stop();
             MessageBox.Show(e.ExceptionObject.ToString(), "Unhandled Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }

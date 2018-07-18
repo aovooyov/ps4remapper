@@ -55,7 +55,20 @@ namespace PS4Remapper.FormsApp.Controls
         }
         private Brush _mInnerBrush = null;
 
+        private Color m_DeadZoneColor;
+        public Color DeadZoneColor
+        {
+            get { return m_DeadZoneColor; }
+            set
+            {
+                _mDeadZoneBrush = new SolidBrush(value);
+                m_DeadZoneColor = value;
+            }
+        }
+        private Brush _mDeadZoneBrush = null;
+
         public int InnerSize { get; set; }
+        public int DeadZoneSize { get; set; }
 
         public PointF Value { get; set; }
 
@@ -63,7 +76,9 @@ namespace PS4Remapper.FormsApp.Controls
         {
             OuterColor = Color.DodgerBlue;
             InnerColor = Color.GhostWhite;
-            InnerSize = 12;
+            DeadZoneColor = Color.Red;
+            InnerSize = 2;
+            DeadZoneSize = Remapper.Instance.Mouse.DeadZoneSize;
             Value = new PointF(0f, 0f);
 
             SetStyle(ControlStyles.UserPaint, true);
@@ -83,9 +98,14 @@ namespace PS4Remapper.FormsApp.Controls
 
             // Outer
             e.Graphics.FillEllipse(_mOuterBrush, rect);
+            
+            e.Graphics.FillEllipse(
+                _mDeadZoneBrush, 
+                new Rectangle(((rect.Width / 2) - DeadZoneSize / 2), ((rect.Height / 2) - DeadZoneSize / 2), DeadZoneSize, DeadZoneSize));
+            
+            var halfSize = InnerSize / 2;
 
             // Inner
-            var halfSize = InnerSize / 2;
             var innerRect = new Rectangle(((rect.Width / 2) - halfSize), ((rect.Height / 2) - halfSize), InnerSize, InnerSize);
             innerRect.X += (int)(((rect.Width / 2) - halfSize) * Value.X);
             innerRect.Y -= (int)(((rect.Height / 2) - halfSize) * Value.Y);

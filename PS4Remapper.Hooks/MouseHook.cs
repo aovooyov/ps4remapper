@@ -181,5 +181,4 @@ namespace PS4Remapper.Hooks
             return fEatMouseStroke ? (IntPtr)1 : CallNextHookEx(IntPtr.Zero, nCode, wParam, lParam);
         }
     }
-
 }

@@ -4,12 +4,13 @@ using PS4Remapper.Hooks.States;
 using PS4RemotePlayInterceptor;
 using System;
 using System.Diagnostics;
+using System.Drawing;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
 using Point = System.Drawing.Point;
-using Timer = System.Timers.Timer;
 
 namespace PS4Remapper
 {
@@ -20,13 +21,11 @@ namespace PS4Remapper
         public delegate void OnMouseAxisChangedDelegate(short x, short y);
         public OnMouseAxisChangedDelegate OnMouseAxisChanged { get; set; }
         
-        private Point centered = new Point(Screen.PrimaryScreen.Bounds.Width / 2, Screen.PrimaryScreen.Bounds.Height / 2);
         private byte iMax = byte.MaxValue;
         private byte iMin = byte.MinValue;
 
         private static Stopwatch stopwatch = Stopwatch.StartNew();
-        private static Timer MouseReleaseTimer { get; set; }
-        private Thread tMouseMovement;
+        private static System.Timers.Timer MouseReleaseTimer { get; set; }
 
         public MouseRemapper2(Remapper remapper)
         {
@@ -37,14 +36,22 @@ namespace PS4Remapper
         public double Mouse_Sensitivity_Y = 1000.21299982071f;
         public double Mouse_FinalMod = 100;
         public bool Mouse_Is_RightStick = true;
-        public int Mouse_TickRate = 16;
+        public int Mouse_TickRate = 1;
         public bool Mouse_Invert_X = false;
         public bool Mouse_Invert_Y = false;
         public int DeadZoneSize = 0;
+
+        public short Size = 500;
+        public Rectangle Clip => Cursor.Clip;
+        public Point Position => Cursor.Position;
+
+        private Point _center => new Point(Size / 2, Size / 2);
+        public Point Center => _center;
+
         //public bool Proccessed = false;
 
         public int LeftMouseMapping = 11; // R2
-        public int RightMouseMapping = (int)Keys.E;//10; // L2
+        public int RightMouseMapping = (int)Keys.LShiftKey;//10; // L2
         public int MiddleMouseMapping = 9; // L1
         public bool LeftMouseDown { get; private set; }
         public bool RightMouseDown { get; private set; }
@@ -103,6 +110,30 @@ namespace PS4Remapper
                 }
             }
 
+            if (mouseMoved)
+            {
+                rightX = -mouseAccelX;
+                rightY = mouseAccelY;
+                mouseMoved = false;
+            }
+            else
+            {
+                rightX /= 5;
+                rightY /= 5;
+
+                if (Math.Abs(rightX) <= 0.5f && Math.Abs(rightY) <= 0.5f)
+                {
+                    rightX = 0;
+                    rightY = 0;
+                }
+            }
+
+            var rx = Convert.ToByte(Math.Min(Math.Max(128 + rightX * 127, 0), 255));
+            var ry = Convert.ToByte(Math.Min(Math.Max(128 + rightY * 127, 0), 255));
+
+            _remapper.CurrentState.RX = rx;
+            _remapper.CurrentState.RY = ry;
+
             state = _remapper.CurrentState;
         }
 
@@ -114,16 +145,27 @@ namespace PS4Remapper
 
             if (_remapper.CurrentState != null)
             {
-                var rx = (x / 255f) + (255f / 2);
-                var ry = (y / 255f) + (255f / 2);
+                //var rx = (x / 255f) + (255f / 2);
+                //var ry = (y / 255f) + (255f / 2);
 
-                _remapper.CurrentState.RX = (byte)rx;
-                _remapper.CurrentState.RY = (byte)ry;
+                //_remapper.CurrentState.RX = (byte)rx;
+                //_remapper.CurrentState.RY = (byte)ry;
+
+                //prep->right_x = (uint8_t)fmin(fmax(128 + rightX * 127, 0), 255);
+                //prep->right_y = (uint8_t)fmin(fmax(128 + rightY * 127, 0), 255);
             }
             
-            OnMouseAxisChanged?.Invoke(x, y);
+            //OnMouseAxisChanged?.Invoke(x, y);
         }
 
+        private MouseHook.POINT lastMouse;
+        private double lastMouseTime = 0d;
+
+        private bool mouseMoved = false;
+        double mouseAccelX, mouseAccelY, mouseVelX, mouseVelY;
+        bool kicked, decayKicked;
+        double leftX = 1, leftY = 1, rightX = 1, rightY = 1;
+        
         public void OnMouseEvent(object sender, MouseHookEventArgs e)
         {
             if (!_remapper.CheckFocusedWindow())
@@ -151,43 +193,43 @@ namespace PS4Remapper
                 RightMouseDown = false;
                 e.Handled = true;
             }
-            else if(e.MouseState == MouseState.Move)
+            else if (e.MouseState == MouseState.Move)
             {
-                //if (MouseReleaseTimer != null)
-                //{
-                //    MouseReleaseTimer.Stop();
-                //    MouseReleaseTimer = null;
-                //}
+                var mouse = e.MouseData.Point;
+                var curtime = stopwatch.Elapsed.TotalMilliseconds;
+                stopwatch.Restart();
 
-                var rawX = e.MouseData.Point.X;
-                var rawY = e.MouseData.Point.Y;
+                Cursor.Position = Center;
 
-                //Debug.Print($"e.MouseData.Point = {{X={e.MouseData.Point.X},Y={e.MouseData.Point.Y}}}");
+                var time = curtime - lastMouseTime;
+                var velX = (mouse.X - lastMouse.X) / time;
+                var velY = (mouse.Y - lastMouse.Y) / time;
+                mouseAccelX = (velX - mouseVelX) / time;
+                mouseAccelY = (velY - mouseVelY) / time;
 
-                //MouseMovement_DeadZoning(rawX, rawY);
-                //e.Handled = true;
+                mouseVelX = velX;
+                mouseVelY = velY;
+                lastMouseTime = curtime;
+                lastMouse = mouse;
+                mouseMoved = true;
 
-                //if (MouseReleaseTimer == null)
-                //{
-                //    MouseReleaseTimer = new System.Timers.Timer(200);
-                //    MouseReleaseTimer.Start();
-                //    MouseReleaseTimer.Elapsed += (s, args) =>
-                //    {
-                //        if(_remapper.CurrentState != null)
-                //        {
-                //            Cursor.Position = centered;
-                //            MouseMovement_DeadZoning(centered.X, centered.Y);
-                //        }
+                if (_remapper.IsDebugMouse)
+                {
+                    //Debug.WriteLine($"ax {mouseAccelX} ay {mouseAccelY}");
 
-                //        if (MouseReleaseTimer != null)
-                //        {
-                //            MouseReleaseTimer.Stop();
-                //            MouseReleaseTimer = null;
-                //        }
-                //    };
-                //}
+                    rightX = -mouseAccelX;
+                    rightY = mouseAccelY;
+
+                    Debug.WriteLine($"vx {128 + rightX * 127} vy {128 + rightY * 127}");
+
+                    var rx = Convert.ToByte(Math.Min(Math.Max(128 + rightX * 127, 0), 255));
+                    var ry = Convert.ToByte(Math.Min(Math.Max(128 + rightY * 127, 0), 255));
+                    Debug.WriteLine($"rx {rx} {ry}");
+                }
             }
         }
+
+        private Thread tMouseMovement;
 
         public void Start()
         {
@@ -196,20 +238,25 @@ namespace PS4Remapper
                 return;
             }
 
-            Cursor.Clip = new System.Drawing.Rectangle(0, 0, 1000, 1000); //Screen.FromHandle(_remapper.RemotePlayProcess.MainWindowHandle).Bounds;
-            centered = new Point(Cursor.Clip.Width / 2, Cursor.Clip.Height / 2);
+            Cursor.Clip = new Rectangle(0, 0, Size, Size);
+            Cursor.Position = Center;
+            lastMouse = new MouseHook.POINT
+            {
+                X = Center.X,
+                Y = Center.Y
+            };
 
             CursorHook.ShowSystemCursor(false);
 
             tMouseMovement = new Thread(MouseMovementInput);
             tMouseMovement.SetApartmentState(ApartmentState.STA);
             tMouseMovement.IsBackground = true;
-            tMouseMovement.Start();
+            //tMouseMovement.Start();
         }
 
         public void Stop()
         {
-            Cursor.Clip = new System.Drawing.Rectangle();
+            Cursor.Clip = new Rectangle();
             CursorHook.ShowSystemCursor(true);
 
             if (tMouseMovement != null)
@@ -229,52 +276,100 @@ namespace PS4Remapper
         {
             while (true)
             {
-                MouseMovement();//Cursor.Position.X, Cursor.Position.Y
+                MouseMovement();
                 Thread.Sleep(Mouse_TickRate);
             }
         }
 
-        private void MouseMovement()//int x, int y
+        public void ToCenter()
         {
-            //Debug.Print($"Cursor.Position   = {Cursor.Position.ToString()}");
-
-            var mouseX = Cursor.Position.X;
-            var mouseY = Cursor.Position.Y;
-            Cursor.Position = centered;
-            //CursorHook.SetCursorPosition(centered);
-
-            var timeSinceLastPoll = stopwatch.Elapsed.TotalMilliseconds;
-            stopwatch.Restart();
-
-            var changeX = Mouse_Invert_X ? centered.X - mouseX : mouseX - centered.X;
-            var changeY = !Mouse_Invert_Y ? mouseY - centered.Y : centered.Y - mouseY;
-
-            double sensitivityScaleX = Mouse_Sensitivity_X / 1000.0;
-            double sensitivityScaleY = Mouse_Sensitivity_Y / 1000.0;
-
-            double velocityX = changeX * sensitivityScaleX / timeSinceLastPoll;
-            double velocityY = changeY * sensitivityScaleY / timeSinceLastPoll;
-
-            short joyX = 0, joyY = 0;
-
-            if (velocityX != 0 || velocityY != 0)
-            {
-                var mouseVectorLengthToReachMaxStickPosition = 5d;
-                var mouseVector = new Vector(velocityX, velocityY);
-                var percentMouseMagnitude = mouseVector.Length / mouseVectorLengthToReachMaxStickPosition;
-                percentMouseMagnitude = Math.Min(percentMouseMagnitude, 1.0);
-
-                mouseVector.Normalize();
-
-                var remainingStickMagnitude = short.MaxValue - DeadZoneSize;
-                var targetMagnitude = DeadZoneSize + remainingStickMagnitude * percentMouseMagnitude;
-                mouseVector *= targetMagnitude;
-
-                joyX = Convert.ToInt16(mouseVector.X);
-                joyY = Convert.ToInt16(mouseVector.Y);
-            }
-
-            SetAxis(joyX, joyY);
+            Cursor.Position = Center;
+            //CursorHook.SetCursorPosition(Center);
+            SetAxis(0, 0);
         }
+
+
+        private void MouseMovement()
+        {
+        }
+
+        //private void MouseMovement()
+        //{
+        //    var mouseX = Cursor.Position.X;
+        //    var mouseY = Cursor.Position.Y;
+
+        //    Cursor.Position = Center;
+
+        //    //var rx = (mouseX / (double)Size * short.MaxValue) - 16383;
+        //    //var ry = (mouseY / (double)Size * short.MaxValue) - 16383;
+
+        //    //if (rx > short.MaxValue)
+        //    //{
+        //    //    rx = short.MaxValue;
+        //    //}
+
+        //    //if (ry > short.MaxValue)
+        //    //{
+        //    //    ry = short.MaxValue;
+        //    //}
+
+        //    //if (rx < short.MinValue)
+        //    //{
+        //    //    rx = short.MinValue;
+        //    //}
+
+        //    //if (ry < short.MinValue)
+        //    //{
+        //    //    ry = short.MinValue;
+        //    //}
+
+        //    //var x = Convert.ToInt16(rx);
+        //    //var y = Convert.ToInt16(ry);
+
+        //    //Debug.WriteLine($"joyX: {x} joyY: {y}");
+
+        //    //SetAxis(x, y);
+        //    //return;
+        //    //Debug.WriteLine($"px: {px} py: {py}");
+        //    //Debug.WriteLine($"mx: {mouseX} my: {mouseY}");
+
+        //    //px = mouseX;
+        //    //py = mouseY;
+
+        //    var timeSinceLastPoll = stopwatch.Elapsed.TotalMilliseconds;
+        //    stopwatch.Restart();
+
+        //    var changeX = Mouse_Invert_X ? Center.X - mouseX : mouseX - Center.X;
+        //    var changeY = Mouse_Invert_Y ? Center.Y - mouseY : mouseY - Center.Y;
+
+        //    double sensitivityScaleX = 0.02;//Mouse_Sensitivity_X / 1000.0;
+        //    double sensitivityScaleY = 0.02;//Mouse_Sensitivity_Y / 1000.0;
+
+        //    double velocityX = changeX * sensitivityScaleX / timeSinceLastPoll;
+        //    double velocityY = changeY * sensitivityScaleY / timeSinceLastPoll;
+
+        //    //Debug.WriteLine($"vx: {velocityX} vy: {velocityY}");
+
+        //    if (velocityX != 0 || velocityY != 0)
+        //    {
+        //        short joyX = 0, joyY = 0;
+
+        //        var mouseVectorLengthToReachMaxStickPosition = 5d;
+        //        var mouseVector = new Vector(velocityX, velocityY);
+        //        var percentMouseMagnitude = mouseVector.Length / mouseVectorLengthToReachMaxStickPosition;
+        //        percentMouseMagnitude = Math.Min(percentMouseMagnitude, 1.0);
+
+        //        mouseVector.Normalize();
+
+        //        DeadZoneSize = 7;
+        //        var remainingStickMagnitude = short.MaxValue - DeadZoneSize;
+        //        var targetMagnitude = DeadZoneSize + remainingStickMagnitude * percentMouseMagnitude;
+        //        mouseVector *= targetMagnitude;
+
+        //        joyX = Convert.ToInt16(mouseVector.X);
+        //        joyY = Convert.ToInt16(mouseVector.Y);
+        //        SetAxis(joyX, joyY);
+        //    }
+        //}
     }
 }

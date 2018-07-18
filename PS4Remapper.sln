@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PS4RemotePlayInterceptor", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PS4Remapper.UI", "PS4Remapper.UI\PS4Remapper.UI.csproj", "{0ACC100D-2229-4CBD-9982-4A5A61DC94C5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PS4Remapper.MouseConsoleApp", "PS4Remapper.MouseConsoleApp\PS4Remapper.MouseConsoleApp.csproj", "{6EB84ED8-6A8A-451D-89DC-4B86DBAB9D67}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -111,6 +113,22 @@ Global
 		{0ACC100D-2229-4CBD-9982-4A5A61DC94C5}.Release|x86.ActiveCfg = Release|x86
 		{0ACC100D-2229-4CBD-9982-4A5A61DC94C5}.Release|x86.Build.0 = Release|x86
 		{0ACC100D-2229-4CBD-9982-4A5A61DC94C5}.Release|x86.Deploy.0 = Release|x86
+		{6EB84ED8-6A8A-451D-89DC-4B86DBAB9D67}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6EB84ED8-6A8A-451D-89DC-4B86DBAB9D67}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6EB84ED8-6A8A-451D-89DC-4B86DBAB9D67}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{6EB84ED8-6A8A-451D-89DC-4B86DBAB9D67}.Debug|ARM.Build.0 = Debug|Any CPU
+		{6EB84ED8-6A8A-451D-89DC-4B86DBAB9D67}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{6EB84ED8-6A8A-451D-89DC-4B86DBAB9D67}.Debug|x64.Build.0 = Debug|Any CPU
+		{6EB84ED8-6A8A-451D-89DC-4B86DBAB9D67}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6EB84ED8-6A8A-451D-89DC-4B86DBAB9D67}.Debug|x86.Build.0 = Debug|Any CPU
+		{6EB84ED8-6A8A-451D-89DC-4B86DBAB9D67}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6EB84ED8-6A8A-451D-89DC-4B86DBAB9D67}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6EB84ED8-6A8A-451D-89DC-4B86DBAB9D67}.Release|ARM.ActiveCfg = Release|Any CPU
+		{6EB84ED8-6A8A-451D-89DC-4B86DBAB9D67}.Release|ARM.Build.0 = Release|Any CPU
+		{6EB84ED8-6A8A-451D-89DC-4B86DBAB9D67}.Release|x64.ActiveCfg = Release|Any CPU
+		{6EB84ED8-6A8A-451D-89DC-4B86DBAB9D67}.Release|x64.Build.0 = Release|Any CPU
+		{6EB84ED8-6A8A-451D-89DC-4B86DBAB9D67}.Release|x86.ActiveCfg = Release|Any CPU
+		{6EB84ED8-6A8A-451D-89DC-4B86DBAB9D67}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

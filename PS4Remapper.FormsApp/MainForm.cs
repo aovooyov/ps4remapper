@@ -76,17 +76,6 @@ namespace PS4Remapper.FormsApp
 
         private void buttonDebugMouse_Click(object sender, EventArgs e)
         {
-            //if (Remapper.Instance.IsInjected)
-            //{
-            //    Remapper.Instance.Stop();
-            //}
-            //else
-            //{
-            //    Remapper.Instance.DebugMouse();
-            //}
-
-            //buttonDebugMouse.Text = Remapper.Instance.IsInjected ? "Stop Debug Mouse" : "Debug Mouse";
-
             var form = new MouseForm();
             form.Show();
         }
@@ -101,19 +90,24 @@ namespace PS4Remapper.FormsApp
 
             debug.AppendLine($"fx: {fx} fy: {fy}");
 
-            BeginInvoke(new Action(() =>
+            try
             {
-                labelMouse.Text = debug.ToString();
+                BeginInvoke(new Action(() =>
+                {
+                    labelMouse.Text = debug.ToString();
 
-                float px = (2 * (fx / 255f)) - 1;
-                float py = (2 * (fy / 255f)) - 1;
-                //float px = (2 * (x / 255f)) - 1;
-                //float py = (2 * (y / 255f)) - 1;
-                PointF point = new PointF(px, -py);
+                    float px = (2 * (fx / 255f)) - 1;
+                    float py = (2 * (fy / 255f)) - 1;
+                    PointF point = new PointF(px, -py);
 
-                axisDisplay.Value = point;
-                axisDisplay.Invalidate();
-            }));
+                    axisDisplay.Value = point;
+                    axisDisplay.Invalidate();
+                }));
+            }
+            catch
+            {
+
+            }
         }
 
         private void OnKeyChanged(string name)
