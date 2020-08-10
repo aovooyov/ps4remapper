@@ -18,7 +18,7 @@ namespace PS4Remapper.Hooks
 
         public static void SetCursorPosition(Point p)
         {
-            SetCursorPos(p.Y, p.Y);
+            SetCursorPos(p.X, p.Y);
         }
         #endregion
 

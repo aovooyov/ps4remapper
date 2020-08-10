@@ -22,6 +22,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Text;
@@ -43,42 +44,11 @@ namespace PS4Remapper.FormsApp.Controls
         }
         private Brush _mOuterBrush = null;
 
-        private Color m_InnerColor;
-        public Color InnerColor
-        {
-            get { return m_InnerColor; }
-            set
-            {
-                _mInnerBrush = new SolidBrush(value);
-                m_InnerColor = value;
-            }
-        }
-        private Brush _mInnerBrush = null;
-
-        private Color m_DeadZoneColor;
-        public Color DeadZoneColor
-        {
-            get { return m_DeadZoneColor; }
-            set
-            {
-                _mDeadZoneBrush = new SolidBrush(value);
-                m_DeadZoneColor = value;
-            }
-        }
-        private Brush _mDeadZoneBrush = null;
-
-        public int InnerSize { get; set; }
-        public int DeadZoneSize { get; set; }
-
         public PointF Value { get; set; }
 
         public AxisDisplay()
         {
             OuterColor = Color.DodgerBlue;
-            InnerColor = Color.GhostWhite;
-            DeadZoneColor = Color.Red;
-            InnerSize = 2;
-            DeadZoneSize = Remapper.Instance.Mouse.DeadZoneSize;
             Value = new PointF(0f, 0f);
 
             SetStyle(ControlStyles.UserPaint, true);
@@ -98,18 +68,26 @@ namespace PS4Remapper.FormsApp.Controls
 
             // Outer
             e.Graphics.FillEllipse(_mOuterBrush, rect);
-            
-            e.Graphics.FillEllipse(
-                _mDeadZoneBrush, 
-                new Rectangle(((rect.Width / 2) - DeadZoneSize / 2), ((rect.Height / 2) - DeadZoneSize / 2), DeadZoneSize, DeadZoneSize));
-            
-            var halfSize = InnerSize / 2;
+
+            var deadZoneBrush = new SolidBrush(Color.GhostWhite);
+            var deadZone = Convert.ToSingle(Remapper.Instance.Mouse.DeadZoneSize);
+
+            if (deadZone > 0)
+            {
+                e.Graphics.FillEllipse(
+                    deadZoneBrush,
+                    new RectangleF(((rect.Width / 2) - deadZone / 2), ((rect.Height / 2) - deadZone / 2), deadZone, deadZone));
+            }
+
+            var innerBrush  = new SolidBrush(Color.Red);
+            var innerSize = 6;
+            var halfSize = innerSize / 2;
 
             // Inner
-            var innerRect = new Rectangle(((rect.Width / 2) - halfSize), ((rect.Height / 2) - halfSize), InnerSize, InnerSize);
+            var innerRect = new Rectangle(((rect.Width / 2) - halfSize), ((rect.Height / 2) - halfSize), innerSize, innerSize);
             innerRect.X += (int)(((rect.Width / 2) - halfSize) * Value.X);
             innerRect.Y -= (int)(((rect.Height / 2) - halfSize) * Value.Y);
-            e.Graphics.FillEllipse(_mInnerBrush, innerRect);
+            e.Graphics.FillEllipse(innerBrush, innerRect);
 
             //e.Graphics.FillEllipse(m_InnerBrush, new Rectangle(((rect.Width / 2) - halfSize) * Value.X, ((rect.Height / 2) - halfSize) * Value.Y, InnerSize, InnerSize));
         }

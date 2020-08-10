@@ -94,6 +94,11 @@ namespace PS4Remapper
                 return;
             }
 
+            PID = Interceptor.Inject();
+            RemotePlayProcess = Process.GetProcessById(PID);
+
+            IsInjected = true;
+
             _keyboard = new KeyboardHook();
             _mouse = new MouseHook();
 
@@ -102,11 +107,6 @@ namespace PS4Remapper
 
             _keyboard.KeyboardPressed += KeyboardOnKeyboardPressed;
             _mouse.MouseEvent += MouseOnMouseEvent;
-
-            PID = Interceptor.Inject();
-            RemotePlayProcess = Process.GetProcessById(PID);
-
-            IsInjected = true;
         }
 
         public void DebugKeyboard()
@@ -134,8 +134,6 @@ namespace PS4Remapper
             _mouse = new MouseHook();
             _mouse.Hook();
             _mouse.MouseEvent += MouseOnMouseEvent;
-
-            Mouse.Start();
 
             IsDebugMouse = true;
             IsInjected = true;
@@ -168,8 +166,9 @@ namespace PS4Remapper
 
             Mouse.Stop();
 
-            //Interceptor.StopInjection();
+            Interceptor.StopInjection();
             PID = -1;
+            //RefreshProcess();
             RemotePlayProcess = null;
         }
         
@@ -186,7 +185,6 @@ namespace PS4Remapper
             }
 
             _mouseRemapper.OnReceiveData(ref state);
-            //Debug.Print($"{state.RX} {state.RY} {state.LX} {state.LY}");
         }
 
         private void KeyboardOnKeyboardPressed(object sender, KeyboardHookEventArgs e)

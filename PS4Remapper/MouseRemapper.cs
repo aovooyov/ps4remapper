@@ -222,52 +222,6 @@ namespace PS4Remapper
             if (!_remapper.CheckFocusedWindow())
                 return;
 
-            var checkState = new DualShockState();
-
-            // Left mouse
-            var leftMap = _remapper.Map.ElementAtOrDefault(LeftMouseMapping);
-            if (leftMap != null)
-            {
-                if (LeftMouseDown)
-                {
-                    _remapper.SetValue(_remapper.CurrentState, leftMap.Property, leftMap.Value);
-                }
-                else
-                {
-                    var defaultValue = _remapper.GetValue(checkState, leftMap.Property);
-                    _remapper.SetValue(_remapper.CurrentState, leftMap.Property, defaultValue);
-                }
-            }
-
-            // Right mouse
-            var rightMap = _remapper.Map.ElementAtOrDefault(RightMouseMapping);
-            if (rightMap != null)
-            {
-                if (RightMouseDown)
-                {
-                    _remapper.SetValue(_remapper.CurrentState, rightMap.Property, rightMap.Value);
-                }
-                else
-                {
-                    var defaultValue = _remapper.GetValue(checkState, rightMap.Property);
-                    _remapper.SetValue(_remapper.CurrentState, rightMap.Property, defaultValue);
-                }
-            }
-
-            // Middle mouse
-            var middleMap = _remapper.Map.ElementAtOrDefault(MiddleMouseMapping);
-            if (middleMap != null)
-            {
-                if (MiddleMouseDown)
-                {
-                    _remapper.SetValue(_remapper.CurrentState, middleMap.Property, middleMap.Value);
-                }
-                else
-                {
-                    var defaultValue = _remapper.GetValue(checkState, middleMap.Property);
-                    _remapper.SetValue(_remapper.CurrentState, middleMap.Property, defaultValue);
-                }
-            }
 
             // Mouse Input
             // Mouse moved

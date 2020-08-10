@@ -194,10 +194,7 @@
             // 
             // axisDisplay
             // 
-            this.axisDisplay.DeadZoneColor = System.Drawing.Color.Red;
-            this.axisDisplay.DeadZoneSize = 20;
-            this.axisDisplay.InnerColor = System.Drawing.Color.GhostWhite;
-            this.axisDisplay.InnerSize = 12;
+
             this.axisDisplay.Location = new System.Drawing.Point(12, 12);
             this.axisDisplay.Name = "axisDisplay";
             this.axisDisplay.OuterColor = System.Drawing.Color.DodgerBlue;
@@ -229,6 +226,7 @@
             this.Name = "MouseForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Mouse ";
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MouseForm_KeyDown);
             ((System.ComponentModel.ISupportInitialize)(this.makeupSpeed)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.analogDeadzone)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.decayThreshold)).EndInit();
